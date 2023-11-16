@@ -1408,6 +1408,19 @@ int findLine(float line
 #endif
         break;
       }
+       case 9: {
+#if defined(BLE_SENSORS) && defined(ESP32)
+        if ((int)roundf(line - BSP_BLE) < BLESensors_num_of_sensors) { //
+          float intpart;
+          line = BSP_BLE + modf(line, &intpart);
+        } else {
+          return -1;
+        }
+#else
+        return -1;
+#endif
+        break;
+      }
       default: return -1;
     }
   }
@@ -8179,7 +8192,12 @@ void setup() {
   }
   #else
     #if defined(ESP32_USE_SD)
-    if(!SD_MMC.begin("", true)){
+    // <original>
+    //if(!SD_MMC.begin("", true)){
+    // </original>
+    // <custom>
+    if (!SD.begin(4)) {
+    // </custom>
       printToDebug(PSTR("failed\r\n"));
     } else {
       printToDebug(PSTR("ok\r\n"));
