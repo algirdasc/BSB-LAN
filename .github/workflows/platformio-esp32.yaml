@@ -34,8 +34,7 @@ jobs:
         pip install --upgrade platformio
         platformio update
 
-        # Ethernet library
-        platformio lib -g install 872
+        platformio lib -g install "h2zero/NimBLE-Arduino@^1.4.1"
 
     - name: Setup config
       run: |
