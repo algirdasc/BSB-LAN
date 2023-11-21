@@ -118,21 +118,21 @@ class QueryBLESensors: public NimBLEAdvertisedDeviceCallbacks {
             BLESensors_temp[sensorID] = x / 10.0;
             x =  buf[5] | (buf[6] << 8);
             BLESensors_humidity[sensorID]= x / 10.0;
-            printFmtToDebug(PSTR("Temp: %.1f°, Humidity: %.1f %%\r\n"), BLESensors_temp[sensorID], BLESensors_humidity[sensorID]);
+            printFmtToDebug(PSTR("#%i: Temp: %.1f°, Humidity: %.1f %%\r\n"), sensorID, BLESensors_temp[sensorID], BLESensors_humidity[sensorID]);
           }
           break;
         case 0x04: {
             BLESensors_temp[sensorID] = x / 10.0;
-            printFmtToDebug(PSTR("Temp: %.1f°\r\n"), BLESensors_temp[sensorID]);
+            printFmtToDebug(PSTR("#%i: Temp: %.1f°\r\n"), sensorID, BLESensors_temp[sensorID]);
           }
           break;
         case 0x06: {
             BLESensors_humidity[sensorID] = x / 10.0;
-            printFmtToDebug(PSTR("Humidity: %.1f%%\r\n"), BLESensors_humidity[sensorID]);
+            printFmtToDebug(PSTR("#%i: Humidity: %.1f%%\r\n"), sensorID, BLESensors_humidity[sensorID]);
           }
           break;
         case 0x0A: {
-            printFmtToDebug(PSTR("Battery: %d%%"), x);
+            printFmtToDebug(PSTR("#%i: Battery: %d%%"), sensorID, x);
             if (len > 5 && buf[4] == 2) {
               BLESensors_vbat[sensorID] = (buf[5] | (buf[6] << 8)) / 1000;
               printFmtToDebug(PSTR(", %.3f V"), BLESensors_vbat[sensorID]);
@@ -141,7 +141,7 @@ class QueryBLESensors: public NimBLEAdvertisedDeviceCallbacks {
           }
           break;
         default:
-          printFmtToDebug(PSTR("Type: 0x%02x "), buf[0]);
+          printFmtToDebug(PSTR("#%i: Type: 0x%02x "), sensorID, buf[0]);
           BLESensors_printBuffer(buf, len);
           break;
       }
@@ -247,7 +247,7 @@ class QueryBLESensors: public NimBLEAdvertisedDeviceCallbacks {
           BLESensors_temp[sensorID] = *(int16_t*)(serviceData + 10) / 100.0;
           BLESensors_humidity[sensorID] = *(uint16_t*)(serviceData + 12) / 100.0;
           BLESensors_vbat[sensorID] = *(uint16_t*)(serviceData + 14) /1000;
-          printFmtToDebug(PSTR("Temp: %.2f°, Humidity: %.2f%%, Vbatt: %.3f, Battery: %d%%, flg: 0x%02x, cout: %d\r\n"), BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], serviceData[16], serviceData[18], serviceData[17]);
+          printFmtToDebug(PSTR("#%i: Temp: %.2f°, Humidity: %.2f%%, Vbatt: %.3f, Battery: %d%%, flg: 0x%02x, cout: %d\r\n"), sensorID, BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], serviceData[16], serviceData[18], serviceData[17]);
         } else if(serviceDataLength == 17) { // format atc1441
 //          Serial.printf("MAC: "); printBuffer(serviceData + 4, 6);
           int16_t x = (serviceData[10]<<8) | serviceData[11];
@@ -255,7 +255,7 @@ class QueryBLESensors: public NimBLEAdvertisedDeviceCallbacks {
           x = (serviceData[14]<<8) | serviceData[15];
           BLESensors_vbat[sensorID] = x / 1000;
           BLESensors_humidity[sensorID] = serviceData[12];
-          printFmtToDebug(PSTR("Temp: %.1f°, Humidity: %f%%, Vbatt: %.3f, Battery: %d%%, cout: %d\r\n"), BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], serviceData[13], serviceData[16]);
+          printFmtToDebug(PSTR("#%i: Temp: %.1f°, Humidity: %f%%, Vbatt: %.3f, Battery: %d%%, cout: %d\r\n"), sensorID, BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], serviceData[13], serviceData[16]);
         }
       ble_buffer_mutex = -1;
       }
