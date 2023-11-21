@@ -228,6 +228,7 @@ boolean mqtt_connect() {
         MQTTPubSubClient->setCallback(mqtt_callback);  //Luposoft: set to function is called when incoming message
         MQTTPubSubClient->publish(MQTTWillTopic.c_str(), PSTR("online"), true);
         printFmtToDebug(PSTR("Published status 'online' to topic '%s'\r\n"), MQTTWillTopic.c_str());
+        subscribeMQTTSensorTopics();
         return true;
       }
     }
@@ -295,6 +296,11 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   printToDebug(PSTR("mqtt-message arrived ["));
   printToDebug(topic);
   printlnToDebug(PSTR("] "));
+
+  if (handleMQTTSensorTopic(topic, payload, length)) {
+    return;
+  }
+
   char C_value[24];
   strcpy_P(C_value, PSTR("ACK_"));   //dukess
   char firstsign;
@@ -347,7 +353,6 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     bus->setBusType(bus->getBusType(), bus->getBusAddr(), destAddr);
     my_dev_fam = save_my_dev_fam;
     my_dev_var = save_my_dev_var;
-  }
-
+  }  
 }
 #endif

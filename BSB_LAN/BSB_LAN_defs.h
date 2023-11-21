@@ -209,6 +209,7 @@ typedef enum { //BSP = base sensors program
   BSP_ONEWIRE = 20300,    // One wire (Dallas) sensor
   BSP_MAX = 20500,    // MAX! sensor
   BSP_FLOAT = 20700,    // custom_floats
+  BSP_TEMP = 20720,     // custom_temps
   BSP_LONG = 20800,    // custom_longs
   BSP_BLE = 20900,    // Bluetooth Low Energy sensors
   BSP_END = 21100,    // end of sensors category
@@ -982,6 +983,7 @@ const char STR20501[] PROGMEM = STR20501_TEXT;
 const char STR20502[] PROGMEM = STR20502_TEXT;
 const char STR20503[] PROGMEM = STR20503_TEXT;
 const char STR20700[] PROGMEM = STR20700_TEXT;
+const char STR20720[] PROGMEM = STR20720_TEXT;
 const char STR20800[] PROGMEM = STR20800_TEXT;
 #if defined(BLE_SENSORS) && defined(ESP32)
 const char STR20900[] PROGMEM = STR20900_TEXT;
@@ -1340,8 +1342,9 @@ const char ENUM15046[] PROGMEM_LATEST = {
 {CMD_UNKNOWN, VT_TEMP,          BSP_MAX+0.1, STR20501, 0,                     NULL,         FL_RONLY, DEV_ALL},     // MAX! sensor Current temperature
 {CMD_UNKNOWN, VT_TEMP,          BSP_MAX+0.2, STR20502, 0,                     NULL,         FL_RONLY, DEV_ALL},     // MAX! sensor Destination temperature
 {CMD_UNKNOWN, VT_PERCENT_WORD1, BSP_MAX+0.3, STR20503, 0,                     NULL,         FL_RONLY, DEV_ALL},     // MAX! sensor valve opening (in percent)
-{CMD_UNKNOWN, VT_FLOAT,         BSP_FLOAT, STR20700, 0,                    NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_floats
-{CMD_UNKNOWN, VT_LONG,          BSP_LONG, STR20800, 0,                    NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_longs
+{CMD_UNKNOWN, VT_FLOAT,         BSP_FLOAT, STR20700, 0,                       NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_floats
+{CMD_UNKNOWN, VT_TEMP,          BSP_TEMP, STR20720, 0,                        NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_temps
+{CMD_UNKNOWN, VT_LONG,          BSP_LONG, STR20800, 0,                        NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_longs
 #if defined(BLE_SENSORS) && defined(ESP32)
 {CMD_UNKNOWN, VT_STRING,        BSP_BLE+0.0, STR20900, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor MAC address
 {CMD_UNKNOWN, VT_TEMP,          BSP_BLE+0.1, STR20901, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor Current temperature
