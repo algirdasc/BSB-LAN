@@ -3,6 +3,7 @@
 build/
 
 BSB_LAN_config.h
+BSB_LAN_config_logic.h
 BSB_LAN_custom_defs.h
 BSB_LAN_custom_setup.h
 BSB_LAN_custom_global.h

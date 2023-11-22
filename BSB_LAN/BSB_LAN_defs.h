@@ -208,10 +208,10 @@ typedef enum { //BSP = base sensors program
   BSP_BME280 = 20200,    // BME280 sensor
   BSP_ONEWIRE = 20300,    // One wire (Dallas) sensor
   BSP_MAX = 20500,    // MAX! sensor
-  BSP_FLOAT = 20700,    // custom_floats
-  BSP_TEMP = 20720,     // custom_temps
-  BSP_LONG = 20800,    // custom_longs
-  BSP_BLE = 20900,    // Bluetooth Low Energy sensors
+  BSP_FLOAT = 20700,    // custom_floats    
+  BSP_LONG = 20800,    // custom_longs  
+  BSP_BLE = 20900,    // Bluetooth Low Energy sensors  
+  BSP_MQTT_TEMP = 21000, // MQTT temps
   BSP_END = 21100,    // end of sensors category
 } dt_sensors_base_prog_t;
 
@@ -983,7 +983,6 @@ const char STR20501[] PROGMEM = STR20501_TEXT;
 const char STR20502[] PROGMEM = STR20502_TEXT;
 const char STR20503[] PROGMEM = STR20503_TEXT;
 const char STR20700[] PROGMEM = STR20700_TEXT;
-const char STR20720[] PROGMEM = STR20720_TEXT;
 const char STR20800[] PROGMEM = STR20800_TEXT;
 #if defined(BLE_SENSORS) && defined(ESP32)
 const char STR20900[] PROGMEM = STR20900_TEXT;
@@ -992,6 +991,9 @@ const char STR20902[] PROGMEM = STR20902_TEXT;
 const char STR20903[] PROGMEM = STR20903_TEXT;
 const char STR20904[] PROGMEM = STR20904_TEXT;
 #endif
+const char STR21000[] PROGMEM = STR21000_TEXT;
+const char STR21001[] PROGMEM = STR21001_TEXT;
+const char STR21002[] PROGMEM = STR21002_TEXT;
 const char STR65535[] PROGMEM = "";
 // A catch-all description string for unrecognised command codes
 const char STR99999[] PROGMEM = STR99999_TEXT;
@@ -1343,7 +1345,6 @@ const char ENUM15046[] PROGMEM_LATEST = {
 {CMD_UNKNOWN, VT_TEMP,          BSP_MAX+0.2, STR20502, 0,                     NULL,         FL_RONLY, DEV_ALL},     // MAX! sensor Destination temperature
 {CMD_UNKNOWN, VT_PERCENT_WORD1, BSP_MAX+0.3, STR20503, 0,                     NULL,         FL_RONLY, DEV_ALL},     // MAX! sensor valve opening (in percent)
 {CMD_UNKNOWN, VT_FLOAT,         BSP_FLOAT, STR20700, 0,                       NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_floats
-{CMD_UNKNOWN, VT_TEMP,          BSP_TEMP, STR20720, 0,                        NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_temps
 {CMD_UNKNOWN, VT_LONG,          BSP_LONG, STR20800, 0,                        NULL,         DEFAULT_FLAG, DEV_ALL}, // custom_longs
 #if defined(BLE_SENSORS) && defined(ESP32)
 {CMD_UNKNOWN, VT_STRING,        BSP_BLE+0.0, STR20900, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor MAC address
@@ -1352,6 +1353,9 @@ const char ENUM15046[] PROGMEM_LATEST = {
 {CMD_UNKNOWN, VT_PRESSURE_HPA,  BSP_BLE+0.3, STR20903, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor Pressure [hPa]. For future use
 {CMD_UNKNOWN, VT_VBATT,         BSP_BLE+0.4, STR20904, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor battery voltage [V]
 #endif
+{CMD_UNKNOWN, VT_TEMP,          BSP_MQTT_TEMP+0.0, STR21000, 0,               NULL,         FL_RONLY, DEV_ALL}, 
+{CMD_UNKNOWN, VT_STRING,        BSP_MQTT_TEMP+0.1, STR21001, 0,               NULL,         FL_RONLY, DEV_ALL}, 
+{CMD_UNKNOWN, VT_STRING,        BSP_MQTT_TEMP+0.2, STR21002, 0,               NULL,         FL_RONLY, DEV_ALL}, 
 //{CMD_END,     VT_UNKNOWN,       65535, "",       0,                    NULL,         DEFAULT_FLAG, DEV_ALL}
 
   //Prognr 65526 - 65534 is a dirty trick for reducing enumerations addresses to the same type

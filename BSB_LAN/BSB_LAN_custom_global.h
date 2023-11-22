@@ -7,36 +7,46 @@ void query(float line);
 void SetDevId();
 void GetDevId();
 void resetAverageCalculation();
-const char* printError(uint16_t error);
+const char *printError(uint16_t error);
 int bin2hex(char *toBuffer, byte *fromAddr, int len, char delimiter);
-void SerialPrintRAW(byte* msg, byte len);
+void SerialPrintRAW(byte *msg, byte len);
 int printFmtToDebug(const char *format, ...);
 
-static const int numMQTTTopics = sizeof(MQTTSensors) / sizeof(MQTTSensors[0]);
+// My logic
+static const int MQTT_TEMP_UNKNOWN = 128;
+static const int MQTT_TEMP_WINDOW_OPEN = 127;
+static const int MQTT_TEMP_UNRESPONSIVE_SENSOR = 126;
+static const int MQTT_TEMP_VALID_THRESHOLD = 50;
+static const int numMQTTTemps = sizeof(MQTTSensors) / sizeof(MQTTSensors[0]);
+float MQTTTemps[numMQTTTemps] = {};
 
-void subscribeMQTTSensorTopics()
+void initializeMQTTTemps()
 {
-    for (int i = 0; i < numMQTTTopics; i++) {
-        if (MQTTSensors[i].topic != NULL) {
-          printFmtToDebug(PSTR("Subscribing MQTT topic \"%s\"\r\n"), MQTTSensors[i].topic);
-          MQTTPubSubClient->subscribe(MQTTSensors[i].topic);
-      }
+    for (int i = 0; i < numMQTTTemps; i++)
+    {
+        MQTTTemps[i] = MQTT_TEMP_UNKNOWN;
     }
 }
 
-bool handleMQTTSensorTopic(char* topic, byte* payload, unsigned int length) 
+void subscribeMQTTSensorTopics()
 {
-    for (int i = 0; i < numMQTTTopics; i++) 
+    for (int i = 0; i < numMQTTTemps; i++)
     {
-        if (MQTTSensors[i].topic != NULL && strcmp(topic, MQTTSensors[i].topic) == 0)
+        if (strcmp(MQTTSensors[i], "") != 0)
         {
-            int line = MQTTSensors[i].parameter - BSP_TEMP;
-            if (line < numCustomTemps && line >= 0) {
-                float tempValue = atof((char *) payload);
-                custom_temps[line] = tempValue;
-            } else {
-                printFmtToDebug(PSTR("Invalid custom temp range %i (Sensor: %s, parameter: %i)\r\n"), line, MQTTSensors[i].topic, MQTTSensors[i].parameter);
-            }
+            printFmtToDebug(PSTR("Subscribing MQTT topic \"%s\"\r\n"), MQTTSensors[i]);
+            MQTTPubSubClient->subscribe(MQTTSensors[i]);
+        }
+    }
+}
+
+bool handleMQTTSensorTopic(char *topic, byte *payload, unsigned int length)
+{
+    for (int i = 0; i < numMQTTTemps; i++)
+    {
+        if (strcmp(topic, MQTTSensors[i]) == 0)
+        {
+            MQTTTemps[i] = atof((char *)payload);
 
             return true;
         }

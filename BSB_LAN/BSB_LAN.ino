@@ -517,11 +517,6 @@ typedef struct {
   short int dest_addr;
 } parameter;
 
-typedef struct {
-    const char *topic;
-    int parameter;
-} MQTTSensor;
-
 #include <Arduino.h>
 #include "src/Base64/src/Base64.h"
 
@@ -826,7 +821,6 @@ unsigned long custom_timer = millis();
 unsigned long custom_timer_compare = 0;
 float custom_floats[20] = { 0 };
 long custom_longs[20] = { 0 };
-float custom_temps[20] = { 0 };
 
 #ifdef RGT_EMULATOR
 byte newMinuteValue = 99;
@@ -843,7 +837,6 @@ volatile byte PressedButtons = 0;
 static const int numLogValues = sizeof(log_parameters) / sizeof(log_parameters[0]);
 static const int numCustomFloats = sizeof(custom_floats) / sizeof(custom_floats[0]);
 static const int numCustomLongs = sizeof(custom_longs) / sizeof(custom_longs[0]);
-static const int numCustomTemps = sizeof(custom_temps) / sizeof(custom_temps[0]);
 
 #ifdef AVERAGES
 static const int numAverages = (sizeof(avg_parameters) / sizeof(avg_parameters[0]));
@@ -1317,12 +1310,12 @@ uint8_t recognizeVirtualFunctionGroup(float nr) {
 #endif
   else if (nr >= BSP_MAX && nr < BSP_MAX + MAX_CUL_DEVICES) {return 5;} //20500 - 20699
   else if (nr >= BSP_FLOAT && nr < BSP_FLOAT + numCustomFloats) {return 6;} //20700 - 20719
-  else if (nr >= BSP_LONG && nr < BSP_LONG + numCustomLongs) {return 7;} //20800 - 20899
-  else if (nr >= BSP_TEMP && nr < BSP_TEMP + numCustomTemps) {return 10;} //20720 - 20799
+  else if (nr >= BSP_LONG && nr < BSP_LONG + numCustomLongs) {return 7;} //20800 - 20899  
   #if defined(BLE_SENSORS) && defined(ESP32)
   else if (nr >= BSP_BLE && nr < BSP_BLE + BLESensors_num_of_sensors) {
     return 9;
   }  //20900 - 21099
+  else if (nr >= BSP_MQTT_TEMP && nr < BSP_MQTT_TEMP + numMQTTTemps) {return 10;} //21000 - 21019
 #endif
   return 0;
 }
@@ -1398,8 +1391,7 @@ int findLine(float line
         break;
       }
       case 6: line = BSP_FLOAT; break;      
-      case 7: line = BSP_LONG; break;
-      case 10: line = BSP_TEMP; break;
+      case 7: line = BSP_LONG; break;      
       case 8: {
 #ifdef BME280
         if ((int)roundf(line - BSP_BME280) < BME_Sensors) { //
@@ -1430,6 +1422,15 @@ int findLine(float line
 #endif
         break;
       }
+      case 10: {
+        if ((int)roundf(line - BSP_MQTT_TEMP) < numMQTTTemps) { //
+          float intpart;
+          line = BSP_MQTT_TEMP + modf(line, &intpart);
+        } else {
+          return -1;
+        }
+      }
+      break;
             default: return -1;
     }
   }
@@ -1740,7 +1741,7 @@ void loadPrognrElementsFromTable(float nr, int i) {
       case 7: decodedTelegram.sensorid = nr - BSP_LONG + 1; break;
       case 8: decodedTelegram.sensorid = nr - BSP_BME280 + 1; break;
       case 9: decodedTelegram.sensorid = nr - BSP_BLE + 1; break;
-      case 10: decodedTelegram.sensorid = nr - BSP_TEMP + 1; break;
+      case 10: decodedTelegram.sensorid = nr - BSP_MQTT_TEMP + 1; break;
     }
   }
 }
@@ -3524,10 +3525,6 @@ int set(float line      // the ProgNr of the heater parameter
         custom_floats[(int)line - BSP_FLOAT] = atof(val);
         return 1;
       }
-      if ((line >= BSP_TEMP && line < BSP_TEMP + numCustomTemps)) {
-        custom_temps[(int)line - BSP_TEMP] = atof(val);
-        return 1;
-      }
       if ((line >= BSP_LONG && line < BSP_LONG + numCustomLongs)) {// set custom_longs
         char sscanf_buf[8]; //This parser looks bulky but it take space lesser than custom_longs[line - 20800] = atol(val);
         strcpy_P(sscanf_buf, PSTR("%ld"));
@@ -4483,11 +4480,7 @@ void queryVirtualPrognr(float line, int table_line) {
     case 6: {
       sprintf_P(decodedTelegram.value, PSTR("%.2f"), custom_floats[((uint16_t)line) - BSP_FLOAT]);
       return;
-    }
-    case 10: {
-      sprintf_P(decodedTelegram.value, PSTR("%.2f"), custom_temps[((uint16_t)line) - BSP_TEMP]);
-      return;
-    }
+    }    
     case 7: {
       sprintf_P(decodedTelegram.value, PSTR("%ld"), custom_longs[((uint16_t)line) - BSP_LONG]);
       return;
@@ -4548,6 +4541,36 @@ void queryVirtualPrognr(float line, int table_line) {
 #endif
         break;
       }
+    case 10: {
+      size_t log_sensor = (int)roundf(line - BSP_MQTT_TEMP);
+      uint8_t selector = ((int)roundf((line - BSP_MQTT_TEMP) * 10)) % 10;
+      switch (selector) {
+        case 0: {
+          if (MQTTTemps[log_sensor] > MQTT_TEMP_VALID_THRESHOLD) {
+            decodedTelegram.error = 261;
+            undefinedValueToBuffer(decodedTelegram.value);
+          } else {
+            _printFIXPOINT(decodedTelegram.value, MQTTTemps[log_sensor], 2); 
+          }
+          break;
+        }
+        case 1: strcpy(decodedTelegram.value, MQTTSensors[log_sensor]); break;
+        case 2: {
+          if (MQTTTemps[log_sensor] == MQTT_TEMP_UNRESPONSIVE_SENSOR) 
+          {            
+            strcpy(decodedTelegram.value, "MQTT_TEMP_UNRESPONSIVE_SENSOR");
+          } else if (MQTTTemps[log_sensor] == MQTT_TEMP_WINDOW_OPEN) {
+            strcpy(decodedTelegram.value, "MQTT_TEMP_WINDOW_OPEN");
+          } else if (MQTTTemps[log_sensor] == MQTT_TEMP_UNKNOWN) {
+            strcpy(decodedTelegram.value, "MQTT_TEMP_UNKNOWN");
+          } else {        
+            strcpy(decodedTelegram.value, "OK"); 
+          }          
+          break;
+        }
+      }
+      return;
+    }
   }
   decodedTelegram.error = 7;
   decodedTelegram.msg_type = TYPE_ERR;
@@ -7018,9 +7041,6 @@ void loop() {
             for (int i=0;i<numCustomFloats;i++) {
               printFmtToWebClient(PSTR("<tr><td>\r\ncustom_float[%d]: %.2f\r\n</td></tr>\r\n"), i, custom_floats[i]);
             }
-            for (int i=0;i<numCustomTemps;i++) {
-              printFmtToWebClient(PSTR("<tr><td>\r\ncustom_temp[%d]: %.2f\r\n</td></tr>\r\n"), i, custom_temps[i]);
-            }
             for (int i=0;i<numCustomLongs;i++) {
               printFmtToWebClient(PSTR("<tr><td>\r\ncustom_long[%d]: %ld\r\n</td></tr>\r\n"),i, custom_longs[i]);
             }
@@ -7484,7 +7504,9 @@ void loop() {
         if (rgte_sensorid[i][0].number != 0) {
           uint8_t z = 0;
           float value = 0;
-          for (uint8_t j = 0; j < 5; j++) {
+          float lowest = MQTT_TEMP_VALID_THRESHOLD;
+          const int numSensors = sizeof(rgte_sensorid[i]) / sizeof(rgte_sensorid[i][0]);
+          for (uint8_t j = 0; j < numSensors; j++) {
             if (rgte_sensorid[i][j].number != 0) {
               if(rgte_sensorid[i][j].dest_addr != -1) set_temp_destination(rgte_sensorid[i][j].dest_addr);
               query(rgte_sensorid[i][j].number);
@@ -7492,11 +7514,22 @@ void loop() {
               if (decodedTelegram.type == VT_TEMP && decodedTelegram.error == 0) {
                 z++;
                 value += atof(decodedTelegram.value);
+                if (value < lowest) {
+                  lowest = value;
+                }
               }
             }
           }
           if (z != 0) {
-            _printFIXPOINT(decodedTelegram.value, value / z, 2);
+            switch (rgte_calculation[i]) {
+              case RGT_CALC_LOW:                
+                _printFIXPOINT(decodedTelegram.value, lowest, 2);
+                break;
+              default:                
+                _printFIXPOINT(decodedTelegram.value, value / z, 2);
+                break;
+            }
+            printFmtToDebug(PSTR("Calculated temperature: %s\r\n"), decodedTelegram.value);
             if (bus->getBusType() != BUS_PPS) {
 // if we want to substitute own address sometime to RGT1(2,3)
 //              uint8_t saved_own_address = bus->getBusAddr();
