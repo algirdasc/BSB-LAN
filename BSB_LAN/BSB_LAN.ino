@@ -449,7 +449,7 @@
  *
  */
 
-#include "platformio.h"
+#include "includes/platformio.h"
 
 #if defined(__AVR__)
 #error "Sorry, Arduino Mega not supported since BSB-LAN 2.1"
@@ -741,7 +741,7 @@ ComClient *max_cul;
 
 #ifdef MQTT
 PubSubClient *MQTTPubSubClient;
-#include "MQTTSensors.h"
+#include "include/MQTTSensors.h"
 #endif
 bool haveTelnetClient = false;
 
