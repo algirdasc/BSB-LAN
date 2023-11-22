@@ -198,6 +198,10 @@ char MQTTTopicPrefix[65] = "BSB-LAN"; 	        // Optional: Choose the "topic" f
 // This value is also used as a client ID towards the MQTT broker, change it if you have more than one BSB-LAN on your broker.
 char MQTTDeviceID[32] = "BSB-LAN";
 
+char MQTTSensors[20][65] = {
+  "some/mqtt/topic"
+};
+
 // Logging mode: 0 - disabled, 1 - write values to SD card, 2 - write 24h averages to SD card, 4 - send values to MQTT, 8 -  send values to UDP. Can be any sum of these values.
 byte LoggingMode = 0; //CF_LOGMODE_SD_CARD | CF_LOGMODE_24AVG | CF_LOGMODE_MQTT | CF_LOGMODE_UDP
 
@@ -320,6 +324,14 @@ boolean esp32_save_energy = false;
 #define JSONCONFIG
 
 #define RGT_EMULATOR
+#define RGT_CALC_AVG 0 // Calculate average of all sensors
+#define RGT_CALC_LOW 1 // Calculate take sensor with lowest temperature
+
+uint8_t rgte_calculation[3] = {
+  RGT_CALC_AVG, // Room unit 1
+  RGT_CALC_LOW, // Room unit 2
+  RGT_CALC_LOW, // Room unit 3
+};
 parameter rgte_sensorid[3][5] = {{{0, -1}, {0, -1}, {0, -1}, {0, -1}, {0, -1}}, {{0, -1}, {0, -1}, {0, -1}, {0, -1}, {0, -1}}, {{0, -1}, {0, -1}, {0, -1}, {0, -1}, {0, -1}}}; //Temperature sensor program IDs for RGT1/PPS - RGT3. If zero then RGT will not be emulated. If more than one program set per RGT then average will be calculated and used.
 
 //Enable presence buttons and TWW/DHW push on selected pins.
