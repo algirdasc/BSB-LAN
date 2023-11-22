@@ -449,7 +449,7 @@
  *
  */
 
-#include "includes/platformio.h"
+#include "include/platformio.h"
 
 #if defined(__AVR__)
 #error "Sorry, Arduino Mega not supported since BSB-LAN 2.1"
