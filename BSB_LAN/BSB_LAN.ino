@@ -527,10 +527,6 @@ typedef struct {
 #include "BSB_LAN_config.h"
 #include "BSB_LAN_defs.h"
 
-#ifdef MQTT
-#include "include/MQTTSensors.h"
-#endif
-
 #define REQUIRED_CONFIG_VERSION 33
 #if CONFIG_VERSION < REQUIRED_CONFIG_VERSION
   #error "Your BSB_LAN_config.h is not up to date! Please use the most recent BSB_LAN_config.h.default, rename it to BSB_LAN_config.h and make the necessary changes to this new one." 
@@ -747,6 +743,8 @@ ComClient *max_cul;
 PubSubClient *MQTTPubSubClient;
 #endif
 bool haveTelnetClient = false;
+
+#include "include/MQTTSensors.h"
 
 #define MAX_CUL_DEVICES (sizeof(max_device_list)/sizeof(max_device_list[0]))
 #ifdef MAX_CUL
