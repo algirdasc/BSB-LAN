@@ -744,8 +744,6 @@ PubSubClient *MQTTPubSubClient;
 #endif
 bool haveTelnetClient = false;
 
-#include "include/MQTTSensors.h"
-
 #define MAX_CUL_DEVICES (sizeof(max_device_list)/sizeof(max_device_list[0]))
 #ifdef MAX_CUL
 int32_t max_devices[MAX_CUL_DEVICES] = { 0 };
@@ -1318,8 +1316,7 @@ uint8_t recognizeVirtualFunctionGroup(float nr) {
   #if defined(BLE_SENSORS) && defined(ESP32)
   else if (nr >= BSP_BLE && nr < BSP_BLE + BLESensors_num_of_sensors) {
     return 9;
-  }  //20900 - 21099
-  else if (nr >= BSP_MQTT_TEMP && nr < BSP_MQTT_TEMP + numMQTTTemps) {return 10;} //21000 - 21019
+  }  //20900 - 21099  
 #endif
   return 0;
 }
@@ -1425,14 +1422,6 @@ int findLine(float line
         return -1;
 #endif
         break;
-      }
-      case 10: {
-        if ((int)roundf(line - BSP_MQTT_TEMP) < numMQTTTemps) { //
-          float intpart;
-          line = BSP_MQTT_TEMP + modf(line, &intpart);
-        } else {
-          return -1;
-        }
       }
       break;
             default: return -1;
@@ -1745,7 +1734,6 @@ void loadPrognrElementsFromTable(float nr, int i) {
       case 7: decodedTelegram.sensorid = nr - BSP_LONG + 1; break;
       case 8: decodedTelegram.sensorid = nr - BSP_BME280 + 1; break;
       case 9: decodedTelegram.sensorid = nr - BSP_BLE + 1; break;
-      case 10: decodedTelegram.sensorid = nr - BSP_MQTT_TEMP + 1; break;
     }
   }
 }
@@ -4545,36 +4533,6 @@ void queryVirtualPrognr(float line, int table_line) {
 #endif
         break;
       }
-    case 10: {
-      size_t log_sensor = (int)roundf(line - BSP_MQTT_TEMP);
-      uint8_t selector = ((int)roundf((line - BSP_MQTT_TEMP) * 10)) % 10;
-      switch (selector) {
-        case 0: {
-          if (MQTTTemps[log_sensor] > MQTT_TEMP_VALID_THRESHOLD) {
-            decodedTelegram.error = 261;
-            undefinedValueToBuffer(decodedTelegram.value);
-          } else {
-            _printFIXPOINT(decodedTelegram.value, MQTTTemps[log_sensor], 2); 
-          }
-          break;
-        }
-        case 1: strcpy(decodedTelegram.value, MQTTSensors[log_sensor]); break;
-        case 2: {
-          if (MQTTTemps[log_sensor] == MQTT_TEMP_UNRESPONSIVE_SENSOR) 
-          {            
-            strcpy(decodedTelegram.value, "MQTT_TEMP_UNRESPONSIVE_SENSOR");
-          } else if (MQTTTemps[log_sensor] == MQTT_TEMP_WINDOW_OPEN) {
-            strcpy(decodedTelegram.value, "MQTT_TEMP_WINDOW_OPEN");
-          } else if (MQTTTemps[log_sensor] == MQTT_TEMP_UNKNOWN) {
-            strcpy(decodedTelegram.value, "MQTT_TEMP_UNKNOWN");
-          } else {        
-            strcpy(decodedTelegram.value, "OK"); 
-          }          
-          break;
-        }
-      }
-      return;
-    }
   }
   decodedTelegram.error = 7;
   decodedTelegram.msg_type = TYPE_ERR;
@@ -7508,9 +7466,7 @@ void loop() {
         if (rgte_sensorid[i][0].number != 0) {
           uint8_t z = 0;
           float value = 0;
-          float lowest = MQTT_TEMP_VALID_THRESHOLD;
-          const int numSensors = sizeof(rgte_sensorid[i]) / sizeof(rgte_sensorid[i][0]);
-          for (uint8_t j = 0; j < numSensors; j++) {
+          for (uint8_t j = 0; j < 5; j++) {
             if (rgte_sensorid[i][j].number != 0) {
               if(rgte_sensorid[i][j].dest_addr != -1) set_temp_destination(rgte_sensorid[i][j].dest_addr);
               query(rgte_sensorid[i][j].number);
@@ -7518,22 +7474,11 @@ void loop() {
               if (decodedTelegram.type == VT_TEMP && decodedTelegram.error == 0) {
                 z++;
                 value += atof(decodedTelegram.value);
-                if (value < lowest) {
-                  lowest = value;
-                }
               }
             }
           }
           if (z != 0) {
-            switch (rgte_calculation[i]) {
-              case RGT_CALC_LOW:                
-                _printFIXPOINT(decodedTelegram.value, lowest, 2);
-                break;
-              default:                
-                _printFIXPOINT(decodedTelegram.value, value / z, 2);
-                break;
-            }
-            printFmtToDebug(PSTR("Calculated temperature: %s\r\n"), decodedTelegram.value);
+            _printFIXPOINT(decodedTelegram.value, value / z, 2);
             if (bus->getBusType() != BUS_PPS) {
 // if we want to substitute own address sometime to RGT1(2,3)
 //              uint8_t saved_own_address = bus->getBusAddr();

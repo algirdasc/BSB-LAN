@@ -211,7 +211,6 @@ typedef enum { //BSP = base sensors program
   BSP_FLOAT = 20700,    // custom_floats    
   BSP_LONG = 20800,    // custom_longs  
   BSP_BLE = 20900,    // Bluetooth Low Energy sensors  
-  BSP_MQTT_TEMP = 21000, // MQTT temps
   BSP_END = 21100,    // end of sensors category
 } dt_sensors_base_prog_t;
 
@@ -1353,9 +1352,6 @@ const char ENUM15046[] PROGMEM_LATEST = {
 {CMD_UNKNOWN, VT_PRESSURE_HPA,  BSP_BLE+0.3, STR20903, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor Pressure [hPa]. For future use
 {CMD_UNKNOWN, VT_VBATT,         BSP_BLE+0.4, STR20904, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor battery voltage [V]
 #endif
-{CMD_UNKNOWN, VT_TEMP,          BSP_MQTT_TEMP+0.0, STR21000, 0,               NULL,         FL_RONLY, DEV_ALL}, 
-{CMD_UNKNOWN, VT_STRING,        BSP_MQTT_TEMP+0.1, STR21001, 0,               NULL,         FL_RONLY, DEV_ALL}, 
-{CMD_UNKNOWN, VT_STRING,        BSP_MQTT_TEMP+0.2, STR21002, 0,               NULL,         FL_RONLY, DEV_ALL}, 
 //{CMD_END,     VT_UNKNOWN,       65535, "",       0,                    NULL,         DEFAULT_FLAG, DEV_ALL}
 
   //Prognr 65526 - 65534 is a dirty trick for reducing enumerations addresses to the same type
