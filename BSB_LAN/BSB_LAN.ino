@@ -2135,8 +2135,8 @@ void init_ota_update(){
       HTTPUpload& upload = update_server.upload();
       if (upload.status == UPLOAD_FILE_START) {
         printlnToDebug(PSTR("Updating ESP32 firmware..."));
-        uint32_t maxSketchSpace = 0x140000;
-        if (!Update.begin(maxSketchSpace)) { //start with max available size
+        uint32_t maxSketchSpace = 0x1E0000;
+        if (!Update.begin(maxSketchSpace, U_FLASH, LED_BUILTIN)) { //start with max available size
           Update.printError(Serial);
         }
       } else if (upload.status == UPLOAD_FILE_WRITE) {
@@ -4519,10 +4519,7 @@ void queryVirtualPrognr(float line, int table_line) {
           case 0: bin2hex(decodedTelegram.value, ((byte *)BLE_sensors_macs) + log_sensor * sizeof(mac), sizeof(mac), ':'); break;
           case 1: _printFIXPOINT(decodedTelegram.value, BLESensors_readTemp(log_sensor), 2); break;
           case 2: _printFIXPOINT(decodedTelegram.value, BLESensors_readHumidity(log_sensor), 2); break;
-          case 3:
-            decodedTelegram.error = 261;
-            undefinedValueToBuffer(decodedTelegram.value);
-            break;  //_printFIXPOINT(decodedTelegram.value, BLESensors_readPressure(log_sensor), 2); break;
+          case 3: _printFIXPOINT(decodedTelegram.value, BLESensors_readPbat(log_sensor), 0); break;
           case 4: _printFIXPOINT(decodedTelegram.value, BLESensors_readVbat(log_sensor), 3); break;
           case 5:
             decodedTelegram.error = 261;

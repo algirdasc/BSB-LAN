@@ -2244,8 +2244,8 @@
 #define STR20900_TEXT "BLE Sensor ID"
 #define STR20901_TEXT "BLE Sensor Temperatur"
 #define STR20902_TEXT "BLE Sensor Luftfeuchtigkeit"
-#define STR20903_TEXT "BLE Sensor Pressure"
-#define STR20904_TEXT "BLE Battery voltage"
+#define STR20903_TEXT "BLE Battery Percent"
+#define STR20904_TEXT "BLE Battery Voltage"
 
 #define STR99999_TEXT "UNKNOWN command code"
 

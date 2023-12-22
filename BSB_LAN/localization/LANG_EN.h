@@ -497,7 +497,7 @@
 #define STR20900_TEXT "BLE Sensor ID"
 #define STR20901_TEXT "BLE Sensor Temperature"
 #define STR20902_TEXT "BLE Sensor Humidity"
-#define STR20903_TEXT "BLE Sensor Pressure"
+#define STR20903_TEXT "BLE Battery Percent"
 #define STR20904_TEXT "BLE Battery Voltage"
 #define STR21000_TEXT "MQTT Temperature"
 #define STR21001_TEXT "MQTT Topic"

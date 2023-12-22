@@ -2244,8 +2244,8 @@ UIStrings["STR20800_TEXT"] = "custom_long";
 UIStrings["STR20900_TEXT"] = "BLE Sensor ID";
 UIStrings["STR20901_TEXT"] = "BLE Sensor Temperatur";
 UIStrings["STR20902_TEXT"] = "BLE Sensor Luftfeuchtigkeit";
-UIStrings["STR20903_TEXT"] = "BLE Sensor Pressure";
-UIStrings["STR20904_TEXT"] = "BLE Battery voltage";
+UIStrings["STR20903_TEXT"] = "BLE Battery Percent";
+UIStrings["STR20904_TEXT"] = "BLE Battery Voltage";
 
 UIStrings["STR99999_TEXT"] = "UNKNOWN command code";
 

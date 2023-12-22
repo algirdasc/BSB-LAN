@@ -1349,7 +1349,7 @@ const char ENUM15046[] PROGMEM_LATEST = {
 {CMD_UNKNOWN, VT_STRING,        BSP_BLE+0.0, STR20900, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor MAC address
 {CMD_UNKNOWN, VT_TEMP,          BSP_BLE+0.1, STR20901, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor Current temperature
 {CMD_UNKNOWN, VT_PERCENT_WORD1, BSP_BLE+0.2, STR20902, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor Humidity
-{CMD_UNKNOWN, VT_PRESSURE_HPA,  BSP_BLE+0.3, STR20903, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor Pressure [hPa]. For future use
+{CMD_UNKNOWN, VT_PERCENT,       BSP_BLE+0.3, STR20903, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor Pressure [hPa]. For future use
 {CMD_UNKNOWN, VT_VBATT,         BSP_BLE+0.4, STR20904, 0,                     NULL,         FL_RONLY, DEV_ALL},     // BLE sensor battery voltage [V]
 #endif
 //{CMD_END,     VT_UNKNOWN,       65535, "",       0,                    NULL,         DEFAULT_FLAG, DEV_ALL}

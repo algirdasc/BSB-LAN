@@ -16,6 +16,7 @@ float *BLESensors_temp;
 float *BLESensors_humidity;
 float *BLESensors_pressure;
 float *BLESensors_vbat;
+uint8_t *BLESensors_pbat;
 bool ble_scan_mutex = false;
 int ble_buffer_mutex = -1;
 unsigned long BLESensors_readingInterval = 600; //10 min
@@ -65,6 +66,16 @@ float BLESensors_readVbat(int sensorId){
       delay(1);
     }
     return BLESensors_vbat[sensorId];
+  } else {
+    return -1;
+  }
+}
+uint8_t BLESensors_readPbat(int sensorId){
+    if(sensorId >= 0 && sensorId < BLESensors_num_of_sensors){
+    while(ble_buffer_mutex == sensorId){
+      delay(1);
+    }
+    return BLESensors_pbat[sensorId];
   } else {
     return -1;
   }
@@ -247,7 +258,8 @@ class QueryBLESensors: public NimBLEAdvertisedDeviceCallbacks {
           BLESensors_temp[sensorID] = *(int16_t*)(serviceData + 10) / 100.0;
           BLESensors_humidity[sensorID] = *(uint16_t*)(serviceData + 12) / 100.0;
           BLESensors_vbat[sensorID] = *(uint16_t*)(serviceData + 14) /1000;
-          printFmtToDebug(PSTR("#%i: Temp: %.2f°, Humidity: %.2f%%, Vbatt: %.3f, Battery: %d%%, flg: 0x%02x, cout: %d\r\n"), sensorID, BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], serviceData[16], serviceData[18], serviceData[17]);
+          BLESensors_pbat[sensorID] = serviceData[16];
+          printFmtToDebug(PSTR("#%i: Temp: %.2f°, Humidity: %.2f%%, Vbatt: %.3f, Battery: %d%%, flg: 0x%02x, cout: %d\r\n"), sensorID, BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], BLESensors_pbat[sensorID], serviceData[18], serviceData[17]);
         } else if(serviceDataLength == 17) { // format atc1441
 //          Serial.printf("MAC: "); printBuffer(serviceData + 4, 6);
           int16_t x = (serviceData[10]<<8) | serviceData[11];
@@ -255,7 +267,8 @@ class QueryBLESensors: public NimBLEAdvertisedDeviceCallbacks {
           x = (serviceData[14]<<8) | serviceData[15];
           BLESensors_vbat[sensorID] = x / 1000;
           BLESensors_humidity[sensorID] = serviceData[12];
-          printFmtToDebug(PSTR("#%i: Temp: %.1f°, Humidity: %f%%, Vbatt: %.3f, Battery: %d%%, cout: %d\r\n"), sensorID, BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], serviceData[13], serviceData[16]);
+          BLESensors_pbat[sensorID] = serviceData[13];
+          printFmtToDebug(PSTR("#%i: Temp: %.1f°, Humidity: %f%%, Vbatt: %.3f, Battery: %d%%, cout: %d\r\n"), sensorID, BLESensors_temp[sensorID], BLESensors_humidity[sensorID], BLESensors_vbat[sensorID], BLESensors_pbat[sensorID], serviceData[16]);
         }
       ble_buffer_mutex = -1;
       }
@@ -410,6 +423,7 @@ void BLESensors_init() {
   BLESensors_humidity = (float *)malloc(sizeof(float) * devices);
   BLESensors_pressure = (float *)malloc(sizeof(float) * devices);
   BLESensors_vbat = (float *)malloc(sizeof(uint16_t) * devices);
+  BLESensors_pbat = (uint8_t *)malloc(sizeof(uint8_t) * devices);
   BLESensors_num_of_sensors = devices;
   pBLEScan = NimBLEDevice::getScan();
 }
@@ -429,5 +443,6 @@ void BLESensors_destroy(){
   BLESensors_freemem(BLESensors_humidity);
   BLESensors_freemem(BLESensors_pressure);
   BLESensors_freemem(BLESensors_vbat);
+  BLESensors_freemem(BLESensors_pbat);
 }
 #endif
